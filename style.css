@@ -1,0 +1,380 @@
+/* ===========================================================
+   Chrafty — Link in Bio
+   Palette: peach watercolor + burnt-orange brand accent
+=========================================================== */
+
+:root{
+  --orange: #EA6A1F;
+  --orange-deep: #DD5B12;
+  --peach-1: #FCE6D4;
+  --peach-2: #FBD9BC;
+  --peach-3: #F8C9A3;
+  --cream: #FFF8F2;
+  --card-bg: #FDF3EA;
+  --card-border: #F6DFC9;
+  --ink: #2B2320;
+  --ink-soft: #6B5F57;
+  --whatsapp: #2FBF4F;
+  --whatsapp-deep: #1FA33C;
+  --call: #F07A3D;
+  --feedback: #F0603D;
+
+  --shadow-card: 0 10px 24px rgba(210, 120, 50, 0.14), 0 2px 6px rgba(210,120,50,0.08);
+  --shadow-card-hover: 0 16px 34px rgba(210, 120, 50, 0.20), 0 4px 10px rgba(210,120,50,0.10);
+}
+
+*{ box-sizing: border-box; }
+
+html, body{
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: 'Poppins', sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  overflow-x: hidden;
+}
+
+body{
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+::selection{ background: var(--peach-3); color: var(--ink); }
+
+/* ---------------- background wash ---------------- */
+
+.bg-wash{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 8%, #ffffff 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(ellipse 70% 55% at 8% 0%, var(--peach-3) 0%, rgba(248,201,163,0) 60%),
+    radial-gradient(ellipse 70% 55% at 100% 6%, var(--peach-2) 0%, rgba(251,217,188,0) 60%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, var(--peach-3) 0%, rgba(248,201,163,0) 55%),
+    radial-gradient(ellipse 80% 50% at 0% 100%, var(--peach-2) 0%, rgba(251,217,188,0) 55%),
+    linear-gradient(180deg, var(--peach-1) 0%, var(--cream) 45%, var(--cream) 60%, var(--peach-1) 100%);
+}
+
+.bg-glow{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse 45% 30% at 50% 14%, rgba(255,255,255,0.9), rgba(255,255,255,0) 70%);
+  pointer-events: none;
+}
+
+/* decorative leaf branches */
+.leaf{
+  position: fixed;
+  width: 240px;
+  height: auto;
+  z-index: 1;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.leaf-tl{ top: -10px; left: -20px; }
+.leaf-br{ bottom: -30px; right: -20px; width: 260px; }
+
+.leaf-stem{
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+.leaf-set ellipse{
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 2;
+  opacity: 0.5;
+}
+
+/* hearts + sparkles scattered */
+.heart{
+  position: fixed;
+  color: var(--peach-3);
+  z-index: 1;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.heart i{ filter: drop-shadow(0 1px 0 rgba(255,255,255,0.4)); }
+.heart-1{ top: 26%; left: 10%; font-size: 20px; }
+.heart-2{ top: 12%; right: 9%; font-size: 14px; }
+.heart-3{ top: 40%; right: 6%; font-size: 12px; opacity: 0.4; }
+
+.spark{
+  position: fixed;
+  color: var(--orange);
+  opacity: 0.35;
+  z-index: 1;
+  pointer-events: none;
+  font-size: 14px;
+}
+.spark-1{ top: 30%; left: 6%; }
+.spark-2{ top: 27%; right: 14%; font-size: 12px; }
+
+.dot{
+  position: fixed;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0.3;
+  z-index: 1;
+  pointer-events: none;
+}
+.dot-1{ width: 5px; height: 5px; top: 45%; left: 24%; }
+.dot-2{ width: 4px; height: 4px; top: 8%; left: 34%; }
+.dot-3{ width: 6px; height: 6px; top: 20%; right: 28%; opacity: 0.25; }
+
+/* ---------------- layout ---------------- */
+
+.page{
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 480px;
+  padding: 56px 28px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ---------------- brand header ---------------- */
+
+.brand{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.logo-wrap{
+  position: relative;
+  width: 170px;
+  height: 170px;
+  margin-bottom: 6px;
+}
+
+.logo-c{
+  width: 100%;
+  height: 100%;
+}
+.c-ring{
+  stroke: var(--orange);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.c-thick{
+  stroke: var(--orange);
+  stroke-width: 15;
+  stroke-linecap: round;
+}
+
+.logo-sprig{
+  position: absolute;
+  width: 62px;
+  height: 62px;
+  right: 6px;
+  bottom: 24px;
+}
+.sprig-stem{
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.sprig-leaf{
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.sprig-heart{
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 2.2;
+}
+
+.brand-name{
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(48px, 12vw, 64px);
+  color: var(--orange);
+  margin: -6px 0 14px;
+  letter-spacing: 0.5px;
+}
+
+.brand-divider{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.brand-divider .line{
+  width: 46px;
+  height: 1.5px;
+  background: var(--orange-deep);
+  opacity: 0.6;
+}
+.brand-divider i{
+  color: var(--orange);
+  font-size: 12px;
+}
+
+.tagline{
+  font-family: 'Poppins', sans-serif;
+  font-size: 16.5px;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* ---------------- cards ---------------- */
+
+.card-list{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.link-card{
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 18px 20px;
+  background: linear-gradient(155deg, #FFFDFB 0%, var(--card-bg) 100%);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.28s ease, border-color 0.28s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.link-card:hover{
+  transform: translateY(-4px) scale(1.012);
+  box-shadow: var(--shadow-card-hover);
+  border-color: #F0CBA4;
+}
+
+.link-card:active{
+  transform: translateY(-1px) scale(0.99);
+  transition-duration: 0.1s;
+}
+
+.icon-wrap{
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #fff;
+  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.08), 0 3px 8px rgba(0,0,0,0.10);
+}
+
+.icon-instagram{
+  background: radial-gradient(circle at 30% 110%, #FEDA75 0%, #FA7E1E 24%, #D62976 48%, #962FBF 70%, #4F5BD5 100%);
+}
+.icon-whatsapp{ background: linear-gradient(160deg, #37D24A, var(--whatsapp-deep)); }
+.icon-call{ background: linear-gradient(160deg, #FF9457, var(--call)); }
+.icon-feedback{ background: linear-gradient(160deg, #FF7A5C, var(--feedback)); }
+
+.card-text{
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.card-title{
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.card-subtitle{
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.chevron{
+  flex: 0 0 auto;
+  font-size: 16px;
+  transition: transform 0.28s ease;
+}
+.chevron-orange{ color: var(--orange); }
+.chevron-green{ color: var(--whatsapp-deep); }
+
+.link-card:hover .chevron{
+  transform: translateX(4px);
+}
+
+/* ripple */
+.ripple-layer{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.ripple{
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(234, 106, 31, 0.18);
+  transform: scale(0);
+  animation: ripple-anim 0.6s ease-out forwards;
+}
+@keyframes ripple-anim{
+  to{
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* ---------------- footer ---------------- */
+
+.page-footer{
+  width: 100%;
+  margin-top: 44px;
+  height: 40px;
+}
+
+/* ---------------- responsive ---------------- */
+
+@media (max-width: 400px){
+  .page{ padding: 44px 18px 32px; }
+  .logo-wrap{ width: 140px; height: 140px; }
+  .brand-name{ font-size: 44px; }
+  .link-card{ padding: 15px 16px; gap: 12px; }
+  .icon-wrap{ width: 46px; height: 46px; font-size: 19px; }
+  .card-title{ font-size: 16.5px; }
+  .card-subtitle{ font-size: 12.5px; }
+}
+
+@media (min-width: 700px){
+  .page{ max-width: 560px; padding-top: 72px; }
+  .leaf{ width: 300px; }
+  .leaf-br{ width: 320px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .link-card, .chevron{ transition: none; }
+  .ripple{ animation: none; display:none; }
+}
