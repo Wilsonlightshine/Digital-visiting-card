@@ -387,3 +387,10 @@ body{
   .link-card, .chevron{ transition: none; }
   .ripple{ animation: none; display:none; }
 }
+
+
+.brand-logo{
+  display: block;
+  width: min(100%, 380px);
+  height: auto;
+}
