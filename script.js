@@ -44,8 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (logo) {
     const openGame = () => {
-      window.location.href = GAME_URL;      // opens in the same tab
-      // window.open(GAME_URL, '_blank');   // use this instead for a new tab
+      // opens in a NEW tab (guard prevents opening twice)
+      if (window.__gameOpenedAt && Date.now() - window.__gameOpenedAt < 1500) return;
+      window.__gameOpenedAt = Date.now();
+      window.open(GAME_URL, '_blank', 'noopener');
     };
 
     // Desktop: double click
@@ -72,12 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!logo) return;
 
   let lastTime = 0;
-  let opened = false;
 
   function go() {
-    if (opened) return;
-    opened = true;
-    window.location.href = GAME_URL;
+    if (window.__gameOpenedAt && Date.now() - window.__gameOpenedAt < 1500) return;
+    window.__gameOpenedAt = Date.now();
+    window.open(GAME_URL, '_blank', 'noopener'); // new tab
   }
 
   // Works for touch, pen and mouse
