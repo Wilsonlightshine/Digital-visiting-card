@@ -284,9 +284,15 @@ body{
   color: #fff;
   box-shadow: inset 0 -3px 6px rgba(0,0,0,0.08), 0 3px 8px rgba(0,0,0,0.10);
 }
-.icon-website {
-  background: linear-gradient(135deg, #ff9a3c, #ff5e3a);
+.icon-wrap.icon-website {
+  background: linear-gradient(135deg, #ff9a3c 0%, #ff5e3a 55%, #e8432d 100%);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 94, 58, 0.35);
+}
+
+.icon-wrap.icon-website i {
+  color: #fff;
+  font-size: 22px; /* match the Instagram icon size */
 }
 .icon-instagram{
   background: radial-gradient(circle at 30% 110%, #FEDA75 0%, #FA7E1E 24%, #D62976 48%, #962FBF 70%, #4F5BD5 100%);
