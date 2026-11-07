@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== NEW: Double-tap / double-click logo opens the game =====
   const logo = document.getElementById('logo');
-  const GAME_URL = 'game.html'; // change to your game page or link
+  const GAME_URL = 'https://wilsonlightshine.github.io/cross-crown/'; // change to your game page or link
 
   if (logo) {
     const openGame = () => {
