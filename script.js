@@ -37,9 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
       card.style.transform = '';
     }, { passive: true });
   });
-});
 
-// ===== NEW: Double-tap / double-click logo opens the game =====
+  // ===== NEW: Double-tap / double-click logo opens the game =====
   const logo = document.getElementById('logo');
   const GAME_URL = 'https://wilsonlightshine.github.io/cross-crown/'; // change to your game page or link
 
