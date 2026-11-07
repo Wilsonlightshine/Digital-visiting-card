@@ -400,3 +400,8 @@ body{
   width: min(100%, 280px);
   height: auto;
 }
+
+#logo {
+  -webkit-touch-callout: none;
+  cursor: pointer;
+}

@@ -63,3 +63,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+// ===== FIX: reliable double-tap / double-click on logo (pointer events) =====
+(function () {
+  const GAME_URL = 'https://wilsonlightshine.github.io/cross-crown/';
+  const logo = document.getElementById('logo') || document.querySelector('.brand-logo');
+  if (!logo) return;
+
+  let lastTime = 0;
+  let opened = false;
+
+  function go() {
+    if (opened) return;
+    opened = true;
+    window.location.href = GAME_URL;
+  }
+
+  // Works for touch, pen and mouse
+  logo.addEventListener('pointerup', function (e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const now = Date.now();
+    if (now - lastTime < 500) {
+      go();
+    }
+    lastTime = now;
+  });
+
+  // Desktop fallback
+  logo.addEventListener('dblclick', go);
+
+  // Stop long-press image menu on mobile
+  logo.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+})();
