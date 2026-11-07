@@ -151,6 +151,12 @@ body{
   margin-bottom: 36px;
 }
 
+#logo {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .logo-wrap{
   position: relative;
   width: 170px;
