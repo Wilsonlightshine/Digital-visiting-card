@@ -38,3 +38,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   });
 });
+
+// ===== NEW: Double-tap / double-click logo opens the game =====
+  const logo = document.getElementById('logo');
+  const GAME_URL = 'game.html'; // change to your game page or link
+
+  if (logo) {
+    const openGame = () => {
+      window.location.href = GAME_URL;      // opens in the same tab
+      // window.open(GAME_URL, '_blank');   // use this instead for a new tab
+    };
+
+    // Desktop: double click
+    logo.addEventListener('dblclick', openGame);
+
+    // Mobile: double tap
+    let lastTap = 0;
+    logo.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        e.preventDefault();
+        openGame();
+      }
+      lastTap = now;
+    });
+  }
+});
