@@ -1,7 +1,39 @@
 // Chrafty — link-in-bio interactions
-// Adds a ripple effect on click/tap for every card and ensures
-// full-card clickability without interfering with real navigation.
 
+// ===== 1) No text selection / long-press menu / inspect shortcuts =====
+(function () {
+  const block = (e) => e.preventDefault();
+
+  // Long-press selection, right-click menu, drag, copy
+  ['contextmenu', 'selectstart', 'dragstart', 'copy', 'cut'].forEach((ev) =>
+    document.addEventListener(ev, block, { capture: true })
+  );
+
+  // Safety net: if anything still gets selected, clear it immediately
+  document.addEventListener('selectionchange', () => {
+    const sel = window.getSelection && window.getSelection();
+    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+      sel.removeAllRanges();
+    }
+  });
+
+  // Keyboard shortcuts (F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S, Ctrl+A)
+  document.addEventListener('keydown', (e) => {
+    const k = (e.key || '').toLowerCase();
+    const blocked =
+      e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(k)) ||
+      (e.ctrlKey && ['u', 's', 'a'].includes(k)) ||
+      (e.metaKey && e.altKey && ['i', 'j', 'c', 'u'].includes(k)) ||
+      (e.metaKey && ['s', 'a'].includes(k));
+    if (blocked) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+})();
+
+// ===== 2) Ripple + press feedback on cards =====
 document.addEventListener('DOMContentLoaded', () => {
   const cards = document.querySelectorAll('.link-card');
 
@@ -24,11 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ripple.style.top = `${y}px`;
 
       rippleLayer.appendChild(ripple);
-
       window.setTimeout(() => ripple.remove(), 650);
     });
 
-    // subtle press feedback for touch devices
     card.addEventListener('touchstart', () => {
       card.style.transform = 'translateY(-1px) scale(0.99)';
     }, { passive: true });
@@ -37,63 +67,40 @@ document.addEventListener('DOMContentLoaded', () => {
       card.style.transform = '';
     }, { passive: true });
   });
+});
 
-  // ===== NEW: Double-tap / double-click logo opens the game =====
-  const logo = document.getElementById('logo');
-  const GAME_URL = 'https://wilsonlightshine.github.io/cross-crown/'; // change to your game page or link
+// ===== 3) Double-tap / double-click on logo opens the game =====
+(function () {
+  const GAME_URL = 'https://wilsonlightshine.github.io/cross-crown/';
 
-  if (logo) {
-    const openGame = () => {
-      // opens in a NEW tab (guard prevents opening twice)
+  function init() {
+    const logo = document.getElementById('logo') || document.querySelector('.brand-logo');
+    if (!logo) return;
+
+    let lastTime = 0;
+
+    function go() {
+      // guard: never open twice
       if (window.__gameOpenedAt && Date.now() - window.__gameOpenedAt < 1500) return;
       window.__gameOpenedAt = Date.now();
       window.open(GAME_URL, '_blank', 'noopener');
-    };
-
-    // Desktop: double click
-    logo.addEventListener('dblclick', openGame);
-
-    // Mobile: double tap
-    let lastTap = 0;
-    logo.addEventListener('touchend', (e) => {
-      const now = Date.now();
-      if (now - lastTap < 300) {
-        e.preventDefault();
-        openGame();
-      }
-      lastTap = now;
-    });
-  }
-});
-
-
-// ===== FIX: reliable double-tap / double-click on logo (pointer events) =====
-(function () {
-  const GAME_URL = 'https://wilsonlightshine.github.io/cross-crown/';
-  const logo = document.getElementById('logo') || document.querySelector('.brand-logo');
-  if (!logo) return;
-
-  let lastTime = 0;
-
-  function go() {
-    if (window.__gameOpenedAt && Date.now() - window.__gameOpenedAt < 1500) return;
-    window.__gameOpenedAt = Date.now();
-    window.open(GAME_URL, '_blank', 'noopener'); // new tab
-  }
-
-  // Works for touch, pen and mouse
-  logo.addEventListener('pointerup', function (e) {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    const now = Date.now();
-    if (now - lastTime < 500) {
-      go();
     }
-    lastTime = now;
-  });
 
-  // Desktop fallback
-  logo.addEventListener('dblclick', go);
+    // Touch, pen and mouse
+    logo.addEventListener('pointerup', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      const now = Date.now();
+      if (now - lastTime < 500) go();
+      lastTime = now;
+    });
 
-  // Stop long-press image menu on mobile
-  logo.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    // Desktop fallback
+    logo.addEventListener('dblclick', go);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
