@@ -105,92 +105,128 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 })();
 
-// ===== 4) UPI button: GPay first, then PhonePe, then Paytm/BHIM, then any UPI app =====
-// (the plain upi:// link lets WhatsApp grab the payment, so we try specific apps in order)
+// ===== 4) UPI button: GPay first, then PhonePe, Paytm, BHIM, then any UPI app =====
+// Each app is tried two ways: Android "intent" link, then the app's own link scheme
+// (some browsers ignore intent links). If everything fails, the UPI ID is shown to copy.
 (function () {
   const PA = 'wilson.prince1435@oksbi';
   const PN = 'Wilson Prince';
   const query = 'pa=' + encodeURIComponent(PA) + '&pn=' + encodeURIComponent(PN) + '&cu=INR';
+  const GENERIC = 'upi://pay?' + query;
 
   const ua = navigator.userAgent || '';
   const isAndroid = /Android/i.test(ua);
   const isIOS = /iPhone|iPad|iPod/i.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-  const GENERIC = 'upi://pay?' + query;
+  const inApp = /Instagram|FBAN|FBAV|FB_IAB|WhatsApp|Snapchat|Twitter|LinkedInApp|MicroMessenger/i.test(ua) ||
+    (isAndroid && /; wv\)/.test(ua));
 
   // Priority order
-  const ANDROID_PACKAGES = [
-    'com.google.android.apps.nbu.paisa.user', // Google Pay
-    'com.phonepe.app',                        // PhonePe
-    'net.one97.paytm',                        // Paytm
-    'in.org.npci.upiapp'                      // BHIM
-  ];
-  const IOS_LINKS = [
-    'gpay://upi/pay?' + query,                // Google Pay
-    'phonepe://pay?' + query,                 // PhonePe
-    'paytmmp://pay?' + query                  // Paytm
-  ];
+  const APPS = isAndroid
+    ? [
+      { pkg: 'com.google.android.apps.nbu.paisa.user', scheme: 'tez://upi/pay?' + query },   // Google Pay
+      { pkg: 'com.phonepe.app', scheme: 'phonepe://pay?' + query },                          // PhonePe
+      { pkg: 'net.one97.paytm', scheme: 'paytmmp://pay?' + query },                          // Paytm
+      { pkg: 'in.org.npci.upiapp', scheme: 'bhim://pay?' + query }                           // BHIM
+    ]
+    : [
+      { scheme: 'gpay://upi/pay?' + query },
+      { scheme: 'phonepe://pay?' + query },
+      { scheme: 'paytmmp://pay?' + query }
+    ];
+
+  function showToast() {
+    if (document.getElementById('upi-toast')) return;
+    const t = document.createElement('div');
+    t.id = 'upi-toast';
+    t.style.cssText =
+      'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99;' +
+      'width:calc(100% - 32px);max-width:420px;background:#2B2320;color:#fff;' +
+      'padding:14px 16px;border-radius:16px;font:500 14px/1.45 Poppins,sans-serif;' +
+      'box-shadow:0 10px 30px rgba(0,0,0,.3);text-align:center;';
+    t.innerHTML =
+      'Could not open a payment app.<br>UPI ID: <b>' + PA + '</b>' +
+      (inApp ? '<br><span style="opacity:.8">Tip: open this page in Chrome (⋮ menu → Open in browser).</span>' : '') +
+      '<br><button id="upi-copy" style="margin-top:10px;padding:8px 18px;border:0;border-radius:999px;' +
+      'background:#EA6A1F;color:#fff;font:600 14px Poppins,sans-serif;">Copy UPI ID</button>';
+    document.body.appendChild(t);
+    document.getElementById('upi-copy').addEventListener('click', function () {
+      const done = () => { this.textContent = 'Copied ✓'; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(PA).then(done, done);
+      } else {
+        done();
+      }
+    });
+    setTimeout(() => t.remove(), 12000);
+  }
 
   function init() {
     const btn = document.getElementById('card-pay');
     if (!btn) return;
 
     btn.addEventListener('click', function (e) {
-      if (!isAndroid && !isIOS) return; // computers: leave default behaviour
+      if (!isAndroid && !isIOS) return; // computers: default behaviour
       e.preventDefault();
 
       const base = location.href.split('#')[0];
-      let step = 0;
+      let idx = 0;
+      let phase = 'intent'; // Android: 'intent' first, then 'scheme'
       let done = false;
       let timer = null;
 
-      const finish = () => {
+      function stop() {
         done = true;
         clearTimeout(timer);
         window.removeEventListener('hashchange', onHash);
+        window.removeEventListener('blur', stop);
+        window.removeEventListener('pagehide', stop);
         document.removeEventListener('visibilitychange', onVis);
-      };
+      }
+      function onVis() { if (document.hidden) stop(); } // an app opened
 
-      const onVis = () => { if (document.hidden) finish(); }; // an app opened
+      function nextApp() { idx++; phase = 'intent'; go(); }
 
-      const onHash = () => {
+      // Chrome sends us here when the app is NOT installed -> skip quickly
+      function onHash() {
         if (location.hash === '#upi-next') {
           history.replaceState(null, '', base);
-          next();
+          clearTimeout(timer);
+          nextApp();
         }
-      };
+      }
 
-      function next() {
+      function go() {
         if (done) return;
         clearTimeout(timer);
+        const app = APPS[idx];
 
-        if (isAndroid) {
-          if (step >= ANDROID_PACKAGES.length) {
-            finish();
-            location.href = GENERIC; // last option: any UPI app
-            return;
-          }
-          const pkg = ANDROID_PACKAGES[step++];
-          location.href = 'intent://pay?' + query +
-            '#Intent;scheme=upi;package=' + pkg +
-            ';S.browser_fallback_url=' + encodeURIComponent(base + '#upi-next') + ';end';
-        } else {
-          if (step >= IOS_LINKS.length) {
-            finish();
-            location.href = GENERIC;
-            return;
-          }
-          location.href = IOS_LINKS[step++];
+        if (!app) {                       // every specific app failed
+          location.href = GENERIC;        // let the phone choose any UPI app
+          timer = setTimeout(function () {
+            if (!document.hidden) showToast();
+            stop();
+          }, 2500);
+          return;
         }
 
-        // if nothing happened (app missing / blocked), try the next app
-        timer = setTimeout(next, 1800);
+        if (isAndroid && phase === 'intent') {
+          location.href = 'intent://pay?' + query +
+            '#Intent;scheme=upi;package=' + app.pkg +
+            ';S.browser_fallback_url=' + encodeURIComponent(base + '#upi-next') + ';end';
+          // browser ignored the intent link -> try the app's own scheme
+          timer = setTimeout(function () { phase = 'scheme'; go(); }, 1500);
+        } else {
+          location.href = app.scheme;
+          timer = setTimeout(nextApp, 2200);
+        }
       }
 
       window.addEventListener('hashchange', onHash);
+      window.addEventListener('blur', stop);
+      window.addEventListener('pagehide', stop);
       document.addEventListener('visibilitychange', onVis);
-      next();
+      go();
     });
   }
 
