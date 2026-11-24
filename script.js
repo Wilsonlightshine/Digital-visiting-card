@@ -104,3 +104,99 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
   }
 })();
+
+// ===== 4) UPI button: GPay first, then PhonePe, then Paytm/BHIM, then any UPI app =====
+// (the plain upi:// link lets WhatsApp grab the payment, so we try specific apps in order)
+(function () {
+  const PA = 'wilson.prince1435@oksbi';
+  const PN = 'Wilson Prince';
+  const query = 'pa=' + encodeURIComponent(PA) + '&pn=' + encodeURIComponent(PN) + '&cu=INR';
+
+  const ua = navigator.userAgent || '';
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  const GENERIC = 'upi://pay?' + query;
+
+  // Priority order
+  const ANDROID_PACKAGES = [
+    'com.google.android.apps.nbu.paisa.user', // Google Pay
+    'com.phonepe.app',                        // PhonePe
+    'net.one97.paytm',                        // Paytm
+    'in.org.npci.upiapp'                      // BHIM
+  ];
+  const IOS_LINKS = [
+    'gpay://upi/pay?' + query,                // Google Pay
+    'phonepe://pay?' + query,                 // PhonePe
+    'paytmmp://pay?' + query                  // Paytm
+  ];
+
+  function init() {
+    const btn = document.getElementById('card-pay');
+    if (!btn) return;
+
+    btn.addEventListener('click', function (e) {
+      if (!isAndroid && !isIOS) return; // computers: leave default behaviour
+      e.preventDefault();
+
+      const base = location.href.split('#')[0];
+      let step = 0;
+      let done = false;
+      let timer = null;
+
+      const finish = () => {
+        done = true;
+        clearTimeout(timer);
+        window.removeEventListener('hashchange', onHash);
+        document.removeEventListener('visibilitychange', onVis);
+      };
+
+      const onVis = () => { if (document.hidden) finish(); }; // an app opened
+
+      const onHash = () => {
+        if (location.hash === '#upi-next') {
+          history.replaceState(null, '', base);
+          next();
+        }
+      };
+
+      function next() {
+        if (done) return;
+        clearTimeout(timer);
+
+        if (isAndroid) {
+          if (step >= ANDROID_PACKAGES.length) {
+            finish();
+            location.href = GENERIC; // last option: any UPI app
+            return;
+          }
+          const pkg = ANDROID_PACKAGES[step++];
+          location.href = 'intent://pay?' + query +
+            '#Intent;scheme=upi;package=' + pkg +
+            ';S.browser_fallback_url=' + encodeURIComponent(base + '#upi-next') + ';end';
+        } else {
+          if (step >= IOS_LINKS.length) {
+            finish();
+            location.href = GENERIC;
+            return;
+          }
+          location.href = IOS_LINKS[step++];
+        }
+
+        // if nothing happened (app missing / blocked), try the next app
+        timer = setTimeout(next, 1800);
+      }
+
+      window.addEventListener('hashchange', onHash);
+      document.addEventListener('visibilitychange', onVis);
+      next();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
